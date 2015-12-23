@@ -90,6 +90,12 @@ def topen(source, #noqa
     # Get parser
     if parser_class is None:
         if format is None:
+            if scheme == 'filelike':
+                message = (
+                    'You must specify an explicit format when passing a '
+                    'file-like object as source.'
+                )
+                raise errors.Error(message)
             format = helpers.detect_format(source)
         if format not in _PARSERS:
             message = 'Format "%s" is not supported' % format
@@ -112,6 +118,7 @@ def topen(source, #noqa
 _DEFAULT_SCHEME = 'file'
 
 _LOADERS = {
+    'filelike': loaders.FileLike,
     'file': loaders.File,
     'text': loaders.Text,
     'ftp': loaders.Web,

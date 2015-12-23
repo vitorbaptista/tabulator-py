@@ -4,9 +4,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import io
 import os
 import unittest
-from tabulator import topen, processors
+from tabulator import topen, processors, errors
 
 
 class topenTest(unittest.TestCase):
@@ -165,3 +166,30 @@ class topenTest(unittest.TestCase):
         # Make assertions
         self.assertEqual(contents1, [('1', 'english'), ('2', '中国人')])
         self.assertEqual(contents1, contents2)
+
+    def test_filelike_object(self):
+        csv_data = (
+            'name,lastname\n'
+            'Clark,Kent\n'
+            'Lois,Lane\n'
+        )
+        filelike = io.StringIO(csv_data)
+        table = topen(filelike, format='csv')
+        table.add_processor(processors.Headers())
+        contents = [row for row in table]
+
+        self.assertEqual(len(contents), 2)
+        self.assertEqual(contents[0]['name'], 'Clark')
+        self.assertEqual(contents[0]['lastname'], 'Kent')
+        self.assertEqual(contents[1]['name'], 'Lois')
+        self.assertEqual(contents[1]['lastname'], 'Lane')
+
+    def test_filelike_object_requires_explicit_format(self):
+        csv_data = (
+            'name,lastname\n'
+            'Clark,Kent\n'
+            'Lois,Lane\n'
+        )
+        filelike = io.StringIO(csv_data)
+        with self.assertRaises(errors.Error):
+            topen(filelike)

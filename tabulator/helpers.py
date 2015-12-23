@@ -20,8 +20,11 @@ def detect_scheme(source):
     For example `http` from `http://example.com/table.csv`
 
     """
-    # TODO: rewrite without urlparse
-    scheme = urlparse(source).scheme
+    if hasattr(source, 'read'):
+        scheme = 'filelike'
+    else:
+        # TODO: rewrite without urlparse
+        scheme = urlparse(source).scheme
     return scheme
 
 
